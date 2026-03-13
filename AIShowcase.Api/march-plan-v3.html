@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>March Azure AI Deep Dive — Plan v3.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0D1117;
+    --surface: #161B22;
+    --surface2: #1C2333;
+    --border: #30363D;
+    --azure: #388BFD;
+    --azure-glow: rgba(56,139,253,0.15);
+    --accent: #3DCFB0;
+    --accent-glow: rgba(61,207,176,0.12);
+    --warn: #F0A84B;
+    --ink: #E6EDF3;
+    --ink-mid: #8B949E;
+    --ink-dim: #484F58;
+    --part1: #388BFD;
+    --part2: #3DCFB0;
+    --part3: #BC8CFF;
+    --part4: #F0A84B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    padding: 52px 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .doc-header {
+    margin-bottom: 48px;
+    position: relative;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--azure);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+
+  .version-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 1px;
+  }
+
+  .badge-version { background: var(--azure); color: white; }
+  .badge-active { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+  .meta-text { font-size: 0.78rem; color: var(--ink-mid); font-family: 'IBM Plex Mono', monospace; }
+
+  /* NORTH STAR */
+  .north-star {
+    border: 1px solid var(--azure);
+    background: var(--azure-glow);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+  }
+
+  .ns-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--azure);
+    margin-bottom: 10px;
+  }
+
+  .north-star p {
+    font-size: 0.92rem;
+    color: #B0C4DE;
+    line-height: 1.7;
+  }
+
+  .north-star strong { color: var(--ink); }
+
+  /* APPROACH STRIP */
+  .approach {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .approach-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    text-align: center;
+  }
+
+  .approach-item .a-icon {
+    font-size: 1.4rem;
+    margin-bottom: 6px;
+  }
+
+  .approach-item .a-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    margin-bottom: 4px;
+  }
+
+  .approach-item .a-value {
+    font-size: 0.82rem;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink-mid);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* PARTS */
+  .parts { margin-bottom: 48px; }
+
+  .part {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .part-header {
+    display: grid;
+    grid-template-columns: 6px 1fr;
+    gap: 0;
+  }
+
+  .part-stripe {
+    width: 6px;
+  }
+
+  .part-header-content {
+    padding: 22px 24px 0 24px;
+  }
+
+  .part-number {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .part h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .part-subtitle {
+    font-size: 0.82rem;
+    color: var(--ink-mid);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  .services-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 0 24px 16px 24px;
+  }
+
+  .service-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    border-radius: 4px;
+    border: 1px solid;
+  }
+
+  .part-body {
+    padding: 0 24px 22px 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .part-col-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
+  }
+
+  .part-col ul {
+    list-style: none;
+  }
+
+  .part-col ul li {
+    font-size: 0.82rem;
+    color: var(--ink-mid);
+    padding: 5px 0 5px 14px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.4;
+  }
+
+  .part-col ul li:last-child { border-bottom: none; }
+
+  .part-col ul li::before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    font-size: 0.9rem;
+    top: 4px;
+  }
+
+  /* Part color themes */
+  .part1 .part-stripe { background: var(--part1); }
+  .part1 .part-number { color: var(--part1); }
+  .part1 .service-tag { border-color: var(--part1); color: var(--part1); background: rgba(56,139,253,0.08); }
+  .part1 .part-col ul li::before { color: var(--part1); }
+
+  .part2 .part-stripe { background: var(--part2); }
+  .part2 .part-number { color: var(--part2); }
+  .part2 .service-tag { border-color: var(--part2); color: var(--part2); background: rgba(61,207,176,0.08); }
+  .part2 .part-col ul li::before { color: var(--part2); }
+
+  .part3 .part-stripe { background: var(--part3); }
+  .part3 .part-number { color: var(--part3); }
+  .part3 .service-tag { border-color: var(--part3); color: var(--part3); background: rgba(188,140,255,0.08); }
+  .part3 .part-col ul li::before { color: var(--part3); }
+
+  .part4 .part-stripe { background: var(--part4); }
+  .part4 .part-number { color: var(--part4); }
+  .part4 .service-tag { border-color: var(--part4); color: var(--part4); background: rgba(240,168,75,0.08); }
+  .part4 .part-col ul li::before { color: var(--part4); }
+
+  /* ARCHITECTURE STRIP */
+  .arch-strip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 48px;
+  }
+
+  .arch-strip .section-label { margin-bottom: 16px; }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .arch-item {
+    text-align: center;
+    padding: 14px 10px;
+    background: var(--surface);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .arch-item .arch-icon { font-size: 1.3rem; margin-bottom: 6px; }
+
+  .arch-item .arch-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ink-mid);
+    letter-spacing: 0.5px;
+  }
+
+  /* GUARDRAILS */
+  .guardrails {
+    background: rgba(240,168,75,0.05);
+    border: 1px solid rgba(240,168,75,0.3);
+    border-radius: 10px;
+    padding: 22px 28px;
+    margin-bottom: 48px;
+  }
+
+  .guardrails .section-label { color: var(--warn); border-color: rgba(240,168,75,0.3); }
+
+  .guardrails-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .guardrails-grid li {
+    list-style: none;
+    font-size: 0.82rem;
+    color: #C4974A;
+    padding-left: 16px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .guardrails-grid li::before {
+    content: '⚠';
+    position: absolute;
+    left: 0;
+    font-size: 0.65rem;
+    top: 3px;
+  }
+
+  /* PIVOT LOG */
+  .pivot-log {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 28px;
+  }
+
+  .pivot-entry {
+    display: flex;
+    gap: 20px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+
+  .pivot-entry:last-child { border-bottom: none; }
+
+  .pivot-ver {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--azure);
+    min-width: 40px;
+    padding-top: 2px;
+  }
+
+  .pivot-date {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--ink-dim);
+    min-width: 68px;
+    padding-top: 2px;
+  }
+
+  .pivot-text {
+    font-size: 0.82rem;
+    color: var(--ink-mid);
+    line-height: 1.6;
+  }
+
+  .pivot-text strong { color: var(--ink); }
+  .pivot-text em { color: var(--ink-dim); font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="eyebrow">Michael Bruno — Azure AI Showcase</div>
+  <h1>March Deep Dive Plan</h1>
+  <div class="version-row">
+    <span class="badge badge-version">v3.0</span>
+    <span class="badge badge-active">Active</span>
+    <span class="meta-text">Updated: Mar 10, 2026 &nbsp;·&nbsp; Target: End of March 2026</span>
+  </div>
+</div>
+
+<div class="north-star">
+  <div class="ns-label">North Star</div>
+  <p>Build a <strong>single deployable Azure AI Showcase Application</strong> — one GitHub repo, one resource group, one Bicep deployment — demonstrating how Azure AI services map to real enterprise business problems across 6–7 primitives. <strong>Learn by doing.</strong> Each part builds on the last. End state: a working app, a portfolio entry, and every line of the AI Competencies resume section backed by real hands-on experience.</p>
+</div>
+
+<div class="approach">
+  <div class="approach-item">
+    <div class="a-icon">🔨</div>
+    <div class="a-label">Method</div>
+    <div class="a-value">Build first, read to fill gaps</div>
+  </div>
+  <div class="approach-item">
+    <div class="a-icon">📦</div>
+    <div class="a-label">Structure</div>
+    <div class="a-value">One repo · One resource group</div>
+  </div>
+  <div class="approach-item">
+    <div class="a-icon">🔄</div>
+    <div class="a-label">Pacing</div>
+    <div class="a-value">Parts not calendar weeks</div>
+  </div>
+</div>
+
+<div class="section-label">The Four Parts</div>
+<div class="parts">
+
+  <div class="part part1">
+    <div class="part-header">
+      <div class="part-stripe"></div>
+      <div class="part-header-content">
+        <div class="part-number">Part 1</div>
+        <h2>Document Pipeline</h2>
+        <div class="part-subtitle">User uploads a document. That single action fans out to three primitives automatically — extraction, understanding, retrieval. This is the core enterprise AI pattern and the highest ROI starting point.</div>
+      </div>
+    </div>
+    <div class="services-row">
+      <span class="service-tag">Document Intelligence</span>
+      <span class="service-tag">AI Language</span>
+      <span class="service-tag">AI Search / RAG</span>
+    </div>
+    <div class="part-body">
+      <div class="part-col">
+        <div class="part-col-label">Build Targets</div>
+        <ul>
+          <li><strong>1a</strong> — Document Intelligence extraction — structured fields out ✓</li>
+          <li><strong>1b</strong> — Language Service — entities, sentiment, key phrases</li>
+          <li><strong>1c</strong> — AI Search indexing — document made retrievable</li>
+          <li><strong>1d</strong> — Upload UI — drag/drop PDF or form</li>
+          <li><strong>1e</strong> — .NET service layer — one service class per primitive</li>
+          <li><strong>1f</strong> — Results panel — show extracted + analyzed output</li>
+        </ul>
+      </div>
+      <div class="part-col">
+        <div class="part-col-label">Primitives Covered</div>
+        <ul>
+          <li>#1 Document Understanding</li>
+          <li>#2 Text Understanding</li>
+          <li>#3 Knowledge Retrieval</li>
+          <li>Architecture pattern: event-fan-out from single upload trigger</li>
+          <li>Before/after comparison — what this replaced in custom code</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="part part2">
+    <div class="part-header">
+      <div class="part-stripe"></div>
+      <div class="part-header-content">
+        <div class="part-number">Part 2</div>
+        <h2>Interactive & Media</h2>
+        <div class="part-subtitle">A chat/media panel demonstrating synchronous AI interactions. Speech input, vision analysis on dropped images, and OpenAI conversational — three primitives surfaced through one interactive UI surface.</div>
+      </div>
+    </div>
+    <div class="services-row">
+      <span class="service-tag">Azure OpenAI</span>
+      <span class="service-tag">Azure Speech</span>
+      <span class="service-tag">Azure AI Vision</span>
+    </div>
+    <div class="part-body">
+      <div class="part-col">
+        <div class="part-col-label">Build Targets</div>
+        <ul>
+          <li><strong>2a</strong> — Chat panel — OpenAI .NET SDK integration</li>
+          <li><strong>2b</strong> — Voice input — Speech-to-text feeding the chat</li>
+          <li><strong>2c</strong> — Image drop — Vision analysis with labeled results</li>
+          <li><strong>2d</strong> — Shared UI panel, tabbed or sectioned layout</li>
+          <li><strong>2e</strong> — OpenAI namespace / NuGet — validate the .NET story</li>
+        </ul>
+      </div>
+      <div class="part-col">
+        <div class="part-col-label">Primitives Covered</div>
+        <ul>
+          <li>#4 Conversational AI (necessary coverage, not focus)</li>
+          <li>#5 Speech Processing</li>
+          <li>#6 Vision Perception</li>
+          <li>Architecture pattern: synchronous request/response</li>
+          <li>OpenAI as cross-cutting service — note it touches 4 primitives</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="part part3">
+    <div class="part-header">
+      <div class="part-stripe"></div>
+      <div class="part-header-content">
+        <div class="part-number">Part 3</div>
+        <h2>Platform & Safety Dashboard</h2>
+        <div class="part-subtitle">The broader primitives that operate at platform level — moderation, anomaly awareness, safety guardrails. These are results/status surfaces, not interactive flows. A dashboard panel is the right pattern here.</div>
+      </div>
+    </div>
+    <div class="services-row">
+      <span class="service-tag">Content Safety</span>
+      <span class="service-tag">Azure ML (awareness)</span>
+      <span class="service-tag">Foundry Agents (survey)</span>
+    </div>
+    <div class="part-body">
+      <div class="part-col">
+        <div class="part-col-label">Build Targets</div>
+        <ul>
+          <li><strong>3a</strong> — Content Safety — run outputs from Parts 1 &amp; 2 through moderation</li>
+          <li><strong>3b</strong> — Results dashboard — safety scores, flags, classification</li>
+          <li><strong>3c</strong> — Foundry Agents orientation — survey level, understand what's there</li>
+          <li><strong>3d</strong> — Azure ML — note capabilities, document without deep dive</li>
+        </ul>
+      </div>
+      <div class="part-col">
+        <div class="part-col-label">Primitives Covered</div>
+        <ul>
+          <li>#7 Forecasting (awareness only)</li>
+          <li>#8 Anomaly Detection (awareness only)</li>
+          <li>#11 Planning / Reasoning — Foundry Agents survey</li>
+          <li>#12 Safety / Moderation — hands-on</li>
+          <li>Note: #7, #8, #9 are Azure ML territory — flag, don't deep dive</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="part part4">
+    <div class="part-header">
+      <div class="part-stripe"></div>
+      <div class="part-header-content">
+        <div class="part-number">Part 4</div>
+        <h2>Wrap-Up & Portfolio</h2>
+        <div class="part-subtitle">Synthesize, document, publish. The app is built — now make it presentable and make the learning visible. This part produces the artifacts that make the month professionally reusable.</div>
+      </div>
+    </div>
+    <div class="services-row">
+      <span class="service-tag">Azure Static Web App</span>
+      <span class="service-tag">GitHub Repo</span>
+      <span class="service-tag">Portfolio Entry</span>
+    </div>
+    <div class="part-body">
+      <div class="part-col">
+        <div class="part-col-label">Deliverables</div>
+        <ul>
+          <li><strong>4a</strong> — Deploy showcase app to Azure Static Web App</li>
+          <li><strong>4b</strong> — Clean up Bicep — one-command deploy/teardown confirmed</li>
+          <li><strong>4c</strong> — Architecture diagram — the full solution in one view</li>
+          <li><strong>4d</strong> — Portfolio page on mbruno-projects.com</li>
+          <li><strong>4e</strong> — Resume AI Competencies section — final validation pass</li>
+        </ul>
+      </div>
+      <div class="part-col">
+        <div class="part-col-label">Write-Up Content</div>
+        <ul>
+          <li>Primitives Assessment — all 12 scored by value / lift / accessibility</li>
+          <li>Architecture decisions — why each service, what it replaced</li>
+          <li>Before/after code comparison — custom code vs. AI service</li>
+          <li>Key decisions doc (Storage Queues vs Service Bus style)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="arch-strip">
+  <div class="section-label">Shared Infrastructure — One Resource Group</div>
+  <div class="arch-grid">
+    <div class="arch-item">
+      <div class="arch-icon">🗄️</div>
+      <div class="arch-name">Azure SQL / Cosmos</div>
+    </div>
+    <div class="arch-item">
+      <div class="arch-icon">📦</div>
+      <div class="arch-name">Blob Storage</div>
+    </div>
+    <div class="arch-item">
+      <div class="arch-icon">⚡</div>
+      <div class="arch-name">Azure Functions</div>
+    </div>
+    <div class="arch-item">
+      <div class="arch-icon">🔐</div>
+      <div class="arch-name">Managed Identity</div>
+    </div>
+    <div class="arch-item">
+      <div class="arch-icon">🚀</div>
+      <div class="arch-name">Container App / API</div>
+    </div>
+    <div class="arch-item">
+      <div class="arch-icon">🌐</div>
+      <div class="arch-name">Static Web App (UI)</div>
+    </div>
+    <div class="arch-item">
+      <div class="arch-icon">📋</div>
+      <div class="arch-name">Bicep IaC</div>
+    </div>
+    <div class="arch-item">
+      <div class="arch-icon">📊</div>
+      <div class="arch-name">App Insights</div>
+    </div>
+  </div>
+</div>
+
+<div class="guardrails">
+  <div class="section-label">Guardrails</div>
+  <ul class="guardrails-grid">
+    <li>Set Azure Cost Management budget alert at $75 before any deployments</li>
+    <li>Use consumption/free tiers during build — tear down when not in use</li>
+    <li>Job search stays background — 1–2 hrs every couple days</li>
+    <li>Azure ML is awareness only — it's a separate discipline, don't get pulled in</li>
+    <li>Chatbot / conversational coverage is necessary but not the star of the show</li>
+    <li>Agents / Foundry — survey level only, it's moving too fast to go deep</li>
+    <li>If a service pulls you deeper than planned, follow the energy — plan pivots</li>
+    <li>Parts are sequential but not rigid — revisit earlier parts as learning compounds</li>
+  </ul>
+</div>
+
+<div class="section-label" style="margin-top:0">Version & Pivot Log</div>
+<div class="pivot-log">
+  <div class="pivot-entry">
+    <div class="pivot-ver">v1.0</div>
+    <div class="pivot-date">Mar 8</div>
+    <div class="pivot-text"><strong>Initial plan — week-based hybrid structure.</strong> 12 primitives framework adopted as curriculum backbone. Four calendar weeks: broad survey first two, deep dive last two. Primary deliverable: Azure AI Primitives Assessment document.</div>
+  </div>
+  <div class="pivot-entry">
+    <div class="pivot-ver">v2.0</div>
+    <div class="pivot-date">Mar 8</div>
+    <div class="pivot-text"><strong>Pivot to build-first, parts-based structure.</strong> Calendar weeks replaced with four logical parts. Primary deliverable changed from assessment document to working Azure AI Showcase Application — one repo, one resource group, 6–7 primitives composed into three UI scenarios. Assessment becomes the write-up that accompanies the app. <em>Rationale: learn by doing better matches existing Azure depth; single unified project avoids scattered sample repos; app is stronger portfolio artifact than document alone.</em></div>
+  </div>
+  <div class="pivot-entry">
+    <div class="pivot-ver">v3.0</div>
+    <div class="pivot-date">Mar 10</div>
+    <div class="pivot-text"><strong>Build environment pivot to Visual Studio + numbered build targets.</strong> Replaced VS Code / CLI approach with full Visual Studio for initial build phase. Rationale: familiar tooling (Solution Explorer, NuGet UI, F5/Swagger debugger) reduces friction while learning new AI service patterns — migrate to VS Code once primitives are solid. Build targets numbered by part (1a–1f, 2a–2e, etc.) to enable plan-to-code traceability and future GitHub repo commit alignment. <strong>First milestone logged: 1a complete</strong> — Document Intelligence extraction working end-to-end, 200 OK confirmed in Swagger on Mar 10.</div>
+  </div>
+  <div class="pivot-entry">
+    <div class="pivot-ver">—</div>
+    <div class="pivot-date">—</div>
+    <div class="pivot-text"><em>Future pivots logged here...</em></div>
+  </div>
+</div>
+
+</body>
+</html>

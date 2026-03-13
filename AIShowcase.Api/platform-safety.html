@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Platform & Safety Dashboard — AIShowcase</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #111118;
+      --border:    #1e1e2e;
+      --border2:   #2a2a3e;
+      --text:      #e2e2f0;
+      --muted:     #6b6b8a;
+      --accent:    #7c6af7;
+      --accent2:   #a78bfa;
+      --clean:     #22c55e;
+      --warn:      #f59e0b;
+      --danger:    #ef4444;
+      --hate:      #f97316;
+      --selfharm:  #ec4899;
+      --sexual:    #8b5cf6;
+      --violence:  #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-left { display: flex; flex-direction: column; gap: 0.4rem; }
+    .part-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .header-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 400;
+    }
+    .api-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+    }
+
+    /* ── Layout ── */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .panel-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      background: rgba(124,106,247,0.12);
+      border: 1px solid rgba(124,106,247,0.2);
+    }
+    .panel-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      color: var(--text);
+    }
+    .panel-tag {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent);
+      background: rgba(124,106,247,0.1);
+      border: 1px solid rgba(124,106,247,0.2);
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Input Area ── */
+    .input-area { grid-column: 1 / -1; }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      padding: 0.9rem 1rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.6;
+    }
+    textarea:focus { border-color: var(--accent); }
+    textarea::placeholder { color: var(--muted); }
+
+    .sample-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .sample-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      background: transparent;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sample-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+    .analyze-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .analyze-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+    .analyze-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── Verdict Banner ── */
+    .verdict-banner {
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      border: 1px solid;
+    }
+    .verdict-banner.clean {
+      background: rgba(34,197,94,0.08);
+      border-color: rgba(34,197,94,0.25);
+    }
+    .verdict-banner.flagged {
+      background: rgba(239,68,68,0.08);
+      border-color: rgba(239,68,68,0.3);
+    }
+    .verdict-icon { font-size: 1.5rem; }
+    .verdict-label {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+    .verdict-banner.clean .verdict-label { color: var(--clean); }
+    .verdict-banner.flagged .verdict-label { color: var(--danger); }
+    .verdict-sub {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── Severity Gauges ── */
+    .category-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .category-row { display: flex; flex-direction: column; gap: 0.4rem; }
+    .category-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .category-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .category-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .severity-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    .gauge-track {
+      height: 8px;
+      background: var(--border2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .gauge-fill {
+      height: 100%;
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* category colors */
+    .cat-hate .category-name  { color: var(--hate); }
+    .cat-hate .gauge-fill     { background: var(--hate); }
+    .cat-selfharm .category-name { color: var(--selfharm); }
+    .cat-selfharm .gauge-fill    { background: var(--selfharm); }
+    .cat-sexual .category-name { color: var(--sexual); }
+    .cat-sexual .gauge-fill    { background: var(--sexual); }
+    .cat-violence .category-name { color: var(--violence); }
+    .cat-violence .gauge-fill    { background: var(--violence); }
+
+    /* ── JSON Panel ── */
+    .json-panel { grid-column: 1 / -1; }
+    .json-output {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--muted);
+      min-height: 80px;
+      white-space: pre-wrap;
+      overflow-x: auto;
+      line-height: 1.7;
+    }
+
+    /* ── Info Panel ── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .info-card {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+    }
+    .info-card-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.4rem;
+    }
+    .info-card-value {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .info-card-value.mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+    }
+
+    /* ── Scale Reference ── */
+    .scale-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .scale-item {
+      flex: 1;
+      text-align: center;
+      padding: 0.5rem 0.25rem;
+      border-radius: 6px;
+      border: 1px solid var(--border2);
+    }
+    .scale-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 700;
+      display: block;
+    }
+    .scale-desc {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+    .scale-item.s0 { border-color: rgba(34,197,94,0.3); }
+    .scale-item.s0 .scale-num { color: var(--clean); }
+    .scale-item.s2 { border-color: rgba(245,158,11,0.3); }
+    .scale-item.s2 .scale-num { color: var(--warn); }
+    .scale-item.s4 { border-color: rgba(249,115,22,0.3); }
+    .scale-item.s4 .scale-num { color: var(--hate); }
+    .scale-item.s6 { border-color: rgba(239,68,68,0.3); }
+    .scale-item.s6 .scale-num { color: var(--danger); }
+
+    /* ── Loading State ── */
+    .loading { display: none; }
+    .loading.active { display: flex; align-items: center; gap: 0.5rem; }
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* responsive */
+    @media (max-width: 768px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .input-area, .json-panel { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <span class="part-badge">Part 3 · Primitive #12</span>
+      <h1>Platform &amp; Safety Dashboard</h1>
+      <span class="header-subtitle">Azure Content Safety — Real-time moderation analysis</span>
+    </div>
+    <span class="api-badge">POST /api/contentsafety/analyze-text</span>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- Input Panel -->
+    <div class="panel input-area">
+      <div class="panel-header">
+        <div class="panel-icon">🛡️</div>
+        <span class="panel-title">Content Input</span>
+        <span class="panel-tag">ANALYZE</span>
+      </div>
+
+      <textarea id="inputText" placeholder="Enter text to analyze for content safety...">I love building software on Azure!</textarea>
+
+      <div class="sample-buttons">
+        <span style="font-size:0.7rem; color:var(--muted); align-self:center; font-family:'JetBrains Mono',monospace;">samples →</span>
+        <button class="sample-btn" onclick="setSample('clean')">✅ Clean</button>
+        <button class="sample-btn" onclick="setSample('mild')">⚠️ Mild</button>
+        <button class="sample-btn" onclick="setSample('violence')">🔴 Violence</button>
+        <button class="sample-btn" onclick="setSample('hate')">🟠 Hate</button>
+      </div>
+
+      <button class="analyze-btn" id="analyzeBtn" onclick="analyzeText()">
+        Run Safety Analysis
+      </button>
+
+      <div class="loading" id="loadingState" style="margin-top:0.75rem;">
+        <div class="spinner"></div>
+        <span class="status-text">Calling Azure Content Safety...</span>
+      </div>
+
+      <div class="verdict-banner" id="verdictBanner">
+        <span class="verdict-icon" id="verdictIcon"></span>
+        <div>
+          <div class="verdict-label" id="verdictLabel"></div>
+          <div class="verdict-sub" id="verdictSub"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Severity Gauges -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon">📊</div>
+        <span class="panel-title">Category Severity</span>
+        <span class="panel-tag">LIVE</span>
+      </div>
+
+      <div class="category-grid">
+
+        <div class="category-row cat-hate">
+          <div class="category-header">
+            <span class="category-name">Hate</span>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span class="severity-label" id="hateBadge" style="background:rgba(249,115,22,0.1);color:var(--hate);">—</span>
+              <span class="category-score" id="hateScore" style="color:var(--hate);">–</span>
+            </div>
+          </div>
+          <div class="gauge-track"><div class="gauge-fill" id="hateGauge"></div></div>
+        </div>
+
+        <div class="category-row cat-selfharm">
+          <div class="category-header">
+            <span class="category-name">Self Harm</span>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span class="severity-label" id="selfharmBadge" style="background:rgba(236,72,153,0.1);color:var(--selfharm);">—</span>
+              <span class="category-score" id="selfharmScore" style="color:var(--selfharm);">–</span>
+            </div>
+          </div>
+          <div class="gauge-track"><div class="gauge-fill" id="selfharmGauge"></div></div>
+        </div>
+
+        <div class="category-row cat-sexual">
+          <div class="category-header">
+            <span class="category-name">Sexual</span>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span class="severity-label" id="sexualBadge" style="background:rgba(139,92,246,0.1);color:var(--sexual);">—</span>
+              <span class="category-score" id="sexualScore" style="color:var(--sexual);">–</span>
+            </div>
+          </div>
+          <div class="gauge-track"><div class="gauge-fill" id="sexualGauge"></div></div>
+        </div>
+
+        <div class="category-row cat-violence">
+          <div class="category-header">
+            <span class="category-name">Violence</span>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span class="severity-label" id="violenceBadge" style="background:rgba(239,68,68,0.1);color:var(--danger);">—</span>
+              <span class="category-score" id="violenceScore" style="color:var(--danger);">–</span>
+            </div>
+          </div>
+          <div class="gauge-track"><div class="gauge-fill" id="violenceGauge"></div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Info: Scale + Stats -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-icon">📐</div>
+        <span class="panel-title">Severity Scale</span>
+        <span class="panel-tag">REFERENCE</span>
+      </div>
+
+      <div class="scale-row">
+        <div class="scale-item s0">
+          <span class="scale-num">0</span>
+          <div class="scale-desc">Clean</div>
+        </div>
+        <div class="scale-item s2">
+          <span class="scale-num">2</span>
+          <div class="scale-desc">Low</div>
+        </div>
+        <div class="scale-item s4">
+          <span class="scale-num">4</span>
+          <div class="scale-desc">Medium</div>
+        </div>
+        <div class="scale-item s6">
+          <span class="scale-num">6</span>
+          <div class="scale-desc">High</div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.25rem;">
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-card-label">Last Verdict</div>
+            <div class="info-card-value" id="statVerdict">—</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-label">Analyses Run</div>
+            <div class="info-card-value mono" id="statCount">0</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-label">Max Severity</div>
+            <div class="info-card-value mono" id="statMax">—</div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-label">Flagged Category</div>
+            <div class="info-card-value mono" id="statCategory">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Raw JSON -->
+    <div class="panel json-panel">
+      <div class="panel-header">
+        <div class="panel-icon">{ }</div>
+        <span class="panel-title">Raw API Response</span>
+        <span class="panel-tag">JSON</span>
+      </div>
+      <div class="json-output" id="jsonOutput">// Response will appear here after analysis...</div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = 'https://localhost:7132';
+    let analysisCount = 0;
+
+    const samples = {
+      clean:    'I love building software on Azure! The developer experience has been fantastic.',
+      mild:     'This code is absolutely terrible and whoever wrote it should feel bad about themselves.',
+      violence: 'I want to destroy everything in my path and crush anyone who gets in my way.',
+      hate:     'People from that group are inferior and should not be allowed in our community.'
+    };
+
+    function setSample(key) {
+      document.getElementById('inputText').value = samples[key];
+    }
+
+    function getSeverityLabel(score) {
+      if (score === 0) return 'Clean';
+      if (score === 2) return 'Low';
+      if (score === 4) return 'Medium';
+      return 'High';
+    }
+
+    function updateGauge(prefix, score) {
+      const pct = (score / 6) * 100;
+      document.getElementById(prefix + 'Gauge').style.width = pct + '%';
+      document.getElementById(prefix + 'Score').textContent = score;
+      document.getElementById(prefix + 'Badge').textContent = getSeverityLabel(score);
+    }
+
+    async function analyzeText() {
+      const text = document.getElementById('inputText').value.trim();
+      if (!text) return;
+
+      const btn = document.getElementById('analyzeBtn');
+      const loading = document.getElementById('loadingState');
+      btn.disabled = true;
+      loading.classList.add('active');
+
+      try {
+        const res = await fetch(`${API_BASE}/api/contentsafety/analyze-text`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await res.json();
+        renderResults(data);
+
+      } catch (err) {
+        document.getElementById('jsonOutput').textContent =
+          '// Error: ' + err.message + '\n// Is the API running on https://localhost:7132?';
+      } finally {
+        btn.disabled = false;
+        loading.classList.remove('active');
+      }
+    }
+
+    function renderResults(data) {
+      analysisCount++;
+
+      // Update gauges
+      const catMap = { hate: 0, selfharm: 0, sexual: 0, violence: 0 };
+      data.categories.forEach(c => {
+        const key = c.category.toLowerCase().replace(' ', '');
+        catMap[key] = c.severity;
+      });
+
+      updateGauge('hate', catMap.hate ?? 0);
+      updateGauge('selfharm', catMap.selfharm ?? 0);
+      updateGauge('sexual', catMap.sexual ?? 0);
+      updateGauge('violence', catMap.violence ?? 0);
+
+      // Verdict banner
+      const banner = document.getElementById('verdictBanner');
+      banner.style.display = 'flex';
+      if (data.isClean) {
+        banner.className = 'verdict-banner clean';
+        document.getElementById('verdictIcon').textContent = '✅';
+        document.getElementById('verdictLabel').textContent = 'CONTENT APPROVED';
+        document.getElementById('verdictSub').textContent = 'All categories scored 0 — safe to publish';
+      } else {
+        banner.className = 'verdict-banner flagged';
+        document.getElementById('verdictIcon').textContent = '🚫';
+        document.getElementById('verdictLabel').textContent = 'CONTENT FLAGGED';
+        const flagged = data.categories.filter(c => c.severity > 0).map(c => c.category).join(', ');
+        document.getElementById('verdictSub').textContent = `Flagged: ${flagged}`;
+      }
+
+      // Stats
+      const maxCat = data.categories.reduce((a, b) => a.severity >= b.severity ? a : b);
+      document.getElementById('statVerdict').textContent = data.isClean ? '✅ Clean' : '🚫 Flagged';
+      document.getElementById('statVerdict').style.color = data.isClean ? 'var(--clean)' : 'var(--danger)';
+      document.getElementById('statCount').textContent = analysisCount;
+      document.getElementById('statMax').textContent = maxCat.severity;
+      document.getElementById('statCategory').textContent = maxCat.severity > 0 ? maxCat.category : 'None';
+
+      // Raw JSON
+      document.getElementById('jsonOutput').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+
+</body>
+</html>
