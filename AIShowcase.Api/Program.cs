@@ -13,16 +13,16 @@ namespace AIShowcase.Api
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
-            // Swagger — display only, no Try It Out in production
+            // Swagger - display only, no Try It Out in production
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddCors(options =>
             {
-                // Dev — wide open
+                // Dev - wide open
                 options.AddPolicy("DevPolicy", policy =>
                     policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
-                // Prod — locked to portfolio domain
+                // Prod - locked to portfolio domain
                 options.AddPolicy("ProdPolicy", policy =>
                     policy.WithOrigins(
                         "https://mbruno-projects.com",
@@ -49,9 +49,18 @@ namespace AIShowcase.Api
             var openAiDeployment = builder.Configuration["AzureOpenAI:DeploymentName"];
             builder.Services.AddSingleton(new ChatService(openAiEndpoint, openAiKey, openAiDeployment));
 
-            var speechKey = builder.Configuration["SpeechService:ApiKey"];
-            var speechRegion = builder.Configuration["SpeechService:Region"];
-            builder.Services.AddSingleton(new SpeechService(speechKey, speechRegion));
+            // Speech SDK requires native binaries - wrap to prevent startup crash
+            // if native libs are unavailable on the host platform (e.g. Free tier / 32-bit)
+            try
+            {
+                var speechKey = builder.Configuration["SpeechService:ApiKey"];
+                var speechRegion = builder.Configuration["SpeechService:Region"];
+                builder.Services.AddSingleton(new SpeechService(speechKey, speechRegion));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Startup] Speech service unavailable on this platform: {ex.Message}");
+            }
 
             var visionEndpoint = builder.Configuration["VisionService:Endpoint"];
             var visionApiKey = builder.Configuration["VisionService:ApiKey"];
@@ -65,13 +74,13 @@ namespace AIShowcase.Api
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                // Dev — full Swagger UI with Try It Out enabled
+                // Dev - full Swagger UI with Try It Out enabled
                 app.UseSwaggerUI();
             }
             else
             {
                 app.UseSwagger();
-                // Prod — Swagger UI visible but Try It Out disabled
+                // Prod - Swagger UI visible but Try It Out disabled
                 app.UseSwaggerUI(c =>
                 {
                     c.SupportedSubmitMethods(); // empty = no submit buttons anywhere
