@@ -26,7 +26,8 @@ namespace AIShowcase.Api
                 options.AddPolicy("ProdPolicy", policy =>
                     policy.WithOrigins(
                         "https://mbruno-projects.com",
-                        "https://www.mbruno-projects.com"
+                        "https://www.mbruno-projects.com",
+                        "https://kind-wave-087ca330f2.azurestaticapps.net"
                     )
                     .AllowAnyMethod()
                     .AllowAnyHeader());
