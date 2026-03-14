@@ -23,15 +23,27 @@ namespace AIShowcase.Api
                     policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
                 // Prod - locked to portfolio domain
+
                 options.AddPolicy("ProdPolicy", policy =>
-                    policy.WithOrigins(
-                        "https://mbruno-projects.com",
-                        "https://www.mbruno-projects.com",
-                        "https://kind-wave-087ca330f2.azurestaticapps.net",
-                        "https://kind-wave-087ca330f2.azurestaticapps.net/"
-                    )
-                    .AllowAnyMethod()
-                    .AllowAnyHeader());
+                policy.SetIsOriginAllowed(origin =>
+                    origin == "https://kind-wave-087ca330f2.azurestaticapps.net" ||
+                    origin == "https://mbruno-projects.com" ||
+                    origin == "https://www.mbruno-projects.com"
+                )
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+
+
+
+                //options.AddPolicy("ProdPolicy", policy =>
+                //    policy.WithOrigins(
+                //        "https://mbruno-projects.com",
+                //        "https://www.mbruno-projects.com",
+                //        "https://kind-wave-087ca330f2.azurestaticapps.net",
+                //        "https://kind-wave-087ca330f2.azurestaticapps.net/"
+                //    )
+                //    .AllowAnyMethod()
+                //    .AllowAnyHeader());
                 //options.AddPolicy("ProdPolicy", policy =>
                 //    policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
